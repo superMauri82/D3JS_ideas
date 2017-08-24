@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v4.min.js" type="text/javascript"></script>
+    <script src="https://d3js.org/d3-path.v1.min.js"></script>
+    <script src="https://d3js.org/d3-shape.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  </head>
+
+  <body>
+    <script type="text/javascript">
+      var data = [ 
+             { 
+      	       day: 1, 
+               attendance : 
+      	               [ 
+                         { row: 1 , occupied: 1 },
+                         { row: 2 , occupied: 2 },
+                         { row: 3 , occupied: 3 },
+                         { row: 4 , occupied: 4 },
+                         { row: 5 , occupied: 5 },
+                         { row: 6 , occupied: 6 },
+                         { row: 7 , occupied: 7 },
+                         { row: 8 , occupied: 8 },
+                         { row: 9 , occupied: 9 },
+                         { row: 10 , occupied: 10 },
+                         { row: 11 , occupied: 11 }
+        	       ] 
+      	     },
+             { 
+      	       day: 2, 
+               attendance : 
+      	               [ 
+                         { row: 1 , occupied: 00 },
+                         { row: 2 , occupied: 35 },
+                         { row: 3 , occupied: 20 },
+                         { row: 4 , occupied: 40 },
+                         { row: 5 , occupied: 21 },
+                         { row: 6 , occupied: 32 },
+                         { row: 7 , occupied: 17 },
+                         { row: 8 , occupied: 21 },
+                         { row: 9 , occupied: 12 },
+                         { row: 10 , occupied: 11 },
+                         { row: 11 , occupied: 10 }
+        	       ] 
+      	     },
+             { 
+      	       day: 3, 
+               attendance : 
+      	             [ 
+                         { row: 1 , occupied: 11 },
+                         { row: 2 , occupied: 10 },
+                         { row: 3 , occupied: 9 },
+                         { row: 4 , occupied: 8 },
+                         { row: 5 , occupied: 7 },
+                         { row: 6 , occupied: 6 },
+                         { row: 7 , occupied: 5 },
+                         { row: 8 , occupied: 4 },
+                         { row: 9 , occupied:  3 },
+                         { row: 10 , occupied: 2 },
+                         { row: 11 , occupied: 1 }
+        	       ] 
+      	     }
+      	  ];
+	  
+	  var height            = 700, width=1200;
+    const theatreSetting  = d3.range(0,data[0]['attendance'].length);
+	  const minimalRadius   = 100;
+	  const gapBetweenRows  = 6;
+	  const rowRadialLength = 55;
+	  const correctingAngle = Math.PI/16;
+	  const startAngle      = -Math.PI/4;
+	  const endAngle        = +Math.PI/4;
+	  const fullAngle       = endAngle - startAngle;
+	  const offsetAngle     = Math.PI/2;
+	  
+	  const innerRadii      = d3.range(1,12).map( d => (d)*rowRadialLength   + gapBetweenRows/2 ); 
+	  const outerRadii      = d3.range(1,12).map( d => (d+1)*rowRadialLength - gapBetweenRows/2 ); 
+	  const middleRadii     = d3.range(1,12).map( d => (d+1)*rowRadialLength - rowRadialLength/2 ); 
+	  const tees            = d3.range(1,12).map( d => d/11 ); 
+	  const getXcoord       = (mRadius,phi) => +mRadius*Math.sin(phi);
+	  const getYcoord       = (mRadius,phi) => -mRadius*Math.cos(phi);
+	  const angleScale      = d3.scaleLinear().domain([0,1]).range([startAngle,endAngle]).clamp(true);
+
+    const svg = d3.select('body')
+	                  .append('svg')
+		 	              .attr('width',width)
+		   	            .attr('height',height);
+			            
+	  const rowsG = svg.append('g')
+	                   .attr("transform", "translate(" + width / 2 + "," + height + ")")
+			               .attr('class','rows');
+
+    const allRowsG = 
+      rowsG.selectAll('g')
+	         .data(data[0]['attendance'])
+		       .enter()
+	           .append('g')
+		         .attr('class','eachRowGroup')
+		         .each(function(d,i){
+		           var arc = d3.arc()
+               .innerRadius(innerRadii[i])
+			         .outerRadius(outerRadii[i])
+               .startAngle(startAngle)
+               .endAngle(endAngle); 
+
+	             d3.select(this)
+	                 .append('path')
+		               .attr('class','rowArc')
+	                 .attr('d',arc)
+	                 .style('fill','none')
+	                 .style('stroke',d3.interpolateBlues(tees[i]));
+		 });
+
+
+	  function updateAttendance(data){
+
+	    angleScale.range([startAngle + correctingAngle,endAngle - correctingAngle])      
+
+	    allRowsG
+	      .data(data)
+        .each(function(d,i){
+	        var numberOfPeople = d.occupied;
+	        var auxArray       = d3.range(0,numberOfPeople);
+	        angleScale.domain([0,numberOfPeople-1]);      
+
+	        var attendeesInThisRow = 
+	            d3.select(this)
+		              .selectAll('circle')
+		              .data(auxArray);
+
+	        attendeesInThisRow
+	          .enter()                                                 
+	            .append('circle')                                        
+	              .attr('class','willGo')                                  
+	              .attr('r',(d_,i)=> 10)                                   
+	              .attr('cx',(d_,i) => 0 ) /* Theater Entrance */
+	              .attr('cy',(d_,i) => 0 ) /* Theater Entrance */
+		            .each(function(d_,j){
+		              d3.select(this)
+	                  .attr('fill',(d_,k) => d3.interpolateBlues(tees[i]))     
+	                    .transition()
+		                  .duration(4000)
+		                  .delay((d,k) => 2000 - i*100)
+		                  .attr('cx',getXcoord(middleRadii[i],startAngle))    /* i Row Entrance */
+		                  .attr('cy',getYcoord(middleRadii[i],startAngle))    /* i Row Entrance */
+                        .transition()
+      		              .duration(4000)
+		                      .delay((d_,k) => 5000 -j*100)
+	                        .attr('cx',(d_,k) => getXcoord(middleRadii[i],angleScale(j)))  /* ij Seat Position */
+	                        .attr('cy',(d_,k) => getYcoord(middleRadii[i],angleScale(j))); /* ij Seat Position */
+		            });
+
+	        attendeesInThisRow
+	          .attr('cx',(d_,i) => 0 ) /* Theater Entrance */
+	          .attr('cy',(d_,i) => 0 ) /* Theater Entrance */
+		        .each(function(d_,j){
+		          d3.select(this)
+	              .attr('fill',(d_,k) => d3.interpolateBlues(tees[i]))     
+	              .transition()
+		            .duration(4000)
+		            .delay((d,k) => 2000 - i*100)
+		            .attr('cx',getXcoord(middleRadii[i],startAngle))    /* i Row Entrance */
+		            .attr('cy',getYcoord(middleRadii[i],startAngle))    /* i Row Entrance */
+                  .transition()
+      		        .duration(4000)
+		              .delay((d_,k) => 5000 -j*100)
+	                .attr('cx',(d_,k) => getXcoord(middleRadii[i],angleScale(j)))  /* ij Seat Position */
+	                .attr('cy',(d_,k) => getYcoord(middleRadii[i],angleScale(j))); /* ij Seat Position */
+		        });
+
+	    attendeesInThisRow
+        .exit()
+		    .remove();
+
+	      }); /* ENDs AllRowsG each(...) */
+
+    } /* ENDs updateAttendance function */
+  
+    var day = 0; 
+	  updateAttendance(data[day]['attendance']);
+	  var t = d3.interval(function(){ console.log(day); updateAttendance(data[++day%3]['attendance']);},15000);
+
+     </script>
+  </body>
+</html>
