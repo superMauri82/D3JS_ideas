@@ -147,9 +147,17 @@
                       .attr('cy',getYcoord(middleRadii[i],startAngle))    /* i Row Entrance */
                         .transition()
                         .duration(4000)
-                          .delay((d_,k) => 5000 -j*100)
-                          .attr('cx',(d_,k) => getXcoord(middleRadii[i],angleScale(j)))  /* ij Seat Position */
-                          .attr('cy',(d_,k) => getYcoord(middleRadii[i],angleScale(j))); /* ij Seat Position */
+                        .delay((d_,k) => 5000 -j*100)
+                        .attrTween('cx',function(j){ /* ij Seat x Position */
+		                      return function(t){ 
+		                        return getXcoord(middleRadii[i],angleScale.domain([0,numberOfPeople-1])(t*j)); 
+		                      }
+		                    })
+                        .attrTween('cy',function(j){ /* ij Seat y Position */
+		                      return function(t){ 
+                            return getYcoord(middleRadii[i],angleScale.domain([0,numberOfPeople-1])(t*j)); 
+                          }
+                        });   
                 });
 
           attendeesInThisRow
@@ -166,8 +174,16 @@
                   .transition()
                   .duration(4000)
                   .delay((d_,k) => 5000 -j*100)
-                  .attr('cx',(d_,k) => getXcoord(middleRadii[i],angleScale(j)))  /* ij Seat Position */
-                  .attr('cy',(d_,k) => getYcoord(middleRadii[i],angleScale(j))); /* ij Seat Position */
+                  .attrTween('cx',function(j){ /* ij Seat x Position */
+		                return function(t){ 
+		                  return getXcoord(middleRadii[i],angleScale.domain([0,numberOfPeople-1])(t*j)); 
+		                }
+		              })
+                  .attrTween('cy',function(j){ /* ij Seat y Position */
+		                return function(t){ 
+                      return getYcoord(middleRadii[i],angleScale.domain([0,numberOfPeople-1])(t*j)); 
+                    }
+                  });   
             });
 
       attendeesInThisRow
