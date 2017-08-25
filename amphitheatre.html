@@ -64,6 +64,10 @@
         }
      ];
     
+    /***********************************************/
+    /********** Const and Var declarations *********/
+    /***********************************************/	    
+	    
     var height            = 700, width=1200;
     const theatreSetting  = d3.range(0,data[0]['attendance'].length);
     const minimalRadius   = 100;
@@ -83,6 +87,10 @@
     const getYcoord       = (mRadius,phi) => -mRadius*Math.cos(phi);
     const angleScale      = d3.scaleLinear().domain([0,1]).range([startAngle,endAngle]).clamp(true);
 
+    /***********************************************/
+    /*********** Rows Rendered Only Once ***********/
+    /***********************************************/	    
+	    
     const svg = d3.select('body')
                     .append('svg')
                      .attr('width',width)
@@ -114,6 +122,11 @@
      });
 
 
+    /***********************************************/
+    /************** Dynamic behavior ***************/
+    /******* CREATE - UPDATE - EXIT PATTERN ********/
+    /***********************************************/
+	    
     function updateAttendance(data){
 
       angleScale.range([startAngle + correctingAngle,endAngle - correctingAngle])      
@@ -194,6 +207,11 @@
 
     } /* ENDs updateAttendance function */
   
+	    
+    /***********************************************/
+    /*********** Infinite Loop Triggered ***********/
+    /***********************************************/	    
+	    
     var day = 0; 
     updateAttendance(data[day]['attendance']);
     var t = d3.interval(function(){ console.log(day); updateAttendance(data[++day%3]['attendance']);},15000);
