@@ -86,7 +86,16 @@
     const getXcoord       = (mRadius,phi) => +mRadius*Math.sin(phi);
     const getYcoord       = (mRadius,phi) => -mRadius*Math.cos(phi);
     const angleScale      = d3.scaleLinear().domain([0,1]).range([startAngle,endAngle]).clamp(true);
-
+    //const colInterpolator = d3.interpolateCool;
+    //const colInterpolator = d3.interpolateBrBG;
+    //const colInterpolator = d3.interpolateGreens;
+    //const colInterpolator = d3.interpolateGreys;
+    //const colInterpolator = d3.interpolateBlues;
+    //const colInterpolator = d3.interpolateBuPu;
+    //const colInterpolator = d3.interpolateBuGn;
+    //const colInterpolator = d3.interpolateHcl;
+    const colInterpolator   = d3.interpolateRgb.gamma(2.2)("purple", "orange");
+       
     /***********************************************/
     /*********** Rows Rendered Only Once ***********/
     /***********************************************/	    
@@ -152,7 +161,7 @@
                 .attr('cy',(d_,i) => 0 ) /* Theater Entrance */
                 .each(function(d_,j){
                   d3.select(this)
-                    .attr('fill',(d_,k) => d3.interpolateBlues(tees[i]))     
+                    .attr('fill',(d_,k) => colInterpolator(tees[i]))     
                       .transition()
                       .duration(4000)
                       .delay((d,k) => 2000 - i*100)
@@ -160,7 +169,7 @@
                       .attr('cy',getYcoord(middleRadii[i],startAngle))    /* i Row Entrance */
                         .transition()
                         .duration(4000)
-                        .delay((d_,k) => 5000 -j*100)
+                        .delay((d_,k) => 5000 -j*10)
                         .attrTween('cx',function(j){ /* ij Seat x Position */
 		                      return function(t){ 
 		                        return getXcoord(middleRadii[i],angleScale.domain([0,numberOfPeople-1])(t*j)); 
@@ -178,7 +187,7 @@
             .attr('cy',(d_,i) => 0 ) /* Theater Entrance */
             .each(function(d_,j){
               d3.select(this)
-                .attr('fill',(d_,k) => d3.interpolateBlues(tees[i]))     
+                .attr('fill',(d_,k) => colInterpolator(tees[i]))     
                 .transition()
                 .duration(4000)
                 .delay((d,k) => 2000 - i*100)
@@ -186,7 +195,7 @@
                 .attr('cy',getYcoord(middleRadii[i],startAngle))    /* i Row Entrance */
                   .transition()
                   .duration(4000)
-                  .delay((d_,k) => 5000 -j*100)
+                  .delay((d_,k) => 5000 -j*10)
                   .attrTween('cx',function(j){ /* ij Seat x Position */
 		                return function(t){ 
 		                  return getXcoord(middleRadii[i],angleScale.domain([0,numberOfPeople-1])(t*j)); 
